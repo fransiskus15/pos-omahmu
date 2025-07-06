@@ -1,9 +1,27 @@
 let orders = {};
 
 function selectMenu(nama, harga, imgPath) {
+    // Cek apakah menu sudah ada di order
     if (orders[nama]) {
+        // Jika sudah ada, cek stok tersedia
+        const currentQty = orders[nama].qty;
+        const availableStock = getMenuStock(nama); // Fungsi untuk cek stok dari DOM
+
+        if (currentQty >= availableStock) {
+            showAlert("warning", `Stok ${nama} hanya tersedia ${availableStock} pcs`);
+            return;
+        }
+
         orders[nama].qty += 1;
     } else {
+        // Jika menu baru, cek stok tersedia
+        const availableStock = getMenuStock(nama);
+
+        if (availableStock <= 0) {
+            showAlert("warning", `${nama} sedang tidak tersedia`);
+            return;
+        }
+
         orders[nama] = {
             nama: nama,
             harga: harga,
@@ -187,6 +205,14 @@ function submitPayment() {
     ) || 0;
     const csrfToken = document.querySelector('input[name="_token"]').value;
 
+    // Konversi orders object ke array untuk dikirim ke backend
+    const orderItems = Object.values(orders).map(item => ({
+        nama: item.nama,
+        harga: item.harga,
+        qty: item.qty,
+        img: item.img
+    }));
+
     // Kirim ke backend via AJAX
     fetch('/submit-order', {
             method: 'POST',
@@ -197,30 +223,36 @@ function submitPayment() {
             },
             body: JSON.stringify({
                 id_transaksi: idTransaksi,
-                total: total
+                total: total,
+                order_items: orderItems
             })
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Gagal menyimpan transaksi');
-            // Jika backend return JSON, bisa pakai response.json(),
-            // jika redirect, bisa pakai response.text() atau window.location.reload()
-            return response.json().catch(() => ({}));
-        })
+        .then(response => response.json())
         .then(data => {
-            // Reset semua form dan order
-            orders = {};
-            document.getElementById("orderContent").innerHTML =
-                '<small class="text-muted">Silahkan pilih menu</small>';
-            document.getElementById("totalItemsLabel").innerText = "0 items";
-            document.getElementById("totalHargaLabel").innerText = "Rp 0";
-            document.getElementById("jumlahBayarInput").value = "";
-            document.getElementById("kembalianOutput").value = "";
+            if (data.success) {
+                // Reset semua form dan order
+                orders = {};
+                document.getElementById("orderContent").innerHTML =
+                    '<small class="text-muted">Silahkan pilih menu</small>';
+                document.getElementById("totalItemsLabel").innerText = "0 items";
+                document.getElementById("totalHargaLabel").innerText = "Rp 0";
+                document.getElementById("jumlahBayarInput").value = "";
+                document.getElementById("kembalianOutput").value = "";
 
-            goBackToOrder();
-            showAlert("success", "Transaksi berhasil dicatat!");
+                goBackToOrder();
+                showAlert("success", data.message || "Transaksi berhasil! Stok telah diperbarui.");
+
+                // Refresh halaman untuk update stok di tampilan
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showAlert("danger", data.message || "Gagal memproses transaksi");
+            }
         })
         .catch(error => {
-            showAlert("danger", error.message);
+            console.error('Error:', error);
+            showAlert("danger", "Terjadi kesalahan saat memproses transaksi");
         });
 }
 
@@ -318,3 +350,59 @@ function showAlert(type, message) {
         alertDiv.remove();
     }, 5000);
 }
+
+// Fungsi untuk mendapatkan stok menu dari DOM
+function getMenuStock(namaMenu) {
+    // Cari elemen menu berdasarkan nama
+    const menuItems = document.querySelectorAll('.menu-item');
+    for (let item of menuItems) {
+        const menuName = item.querySelector('h6').textContent.trim();
+        if (menuName === namaMenu) {
+            // Ambil stok dari data attribute atau dari badge
+            const stockBadge = item.querySelector('.badge');
+            if (stockBadge) {
+                const stockText = stockBadge.textContent;
+                const stockNumber = parseInt(stockText.replace(/[^\d]/g, ''));
+                return stockNumber || 0;
+            }
+        }
+    }
+    return 0; // Default jika tidak ditemukan
+}
+
+// Fungsi untuk menonaktifkan menu yang stoknya habis
+function disableOutOfStockMenus() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        const stockBadge = item.querySelector('.badge');
+        if (stockBadge) {
+            const stockText = stockBadge.textContent;
+            const stockNumber = parseInt(stockText.replace(/[^\d]/g, ''));
+
+            if (stockNumber <= 0) {
+                item.style.opacity = '0.5';
+                item.style.pointerEvents = 'none';
+                item.style.cursor = 'not-allowed';
+
+                // Tambahkan overlay "Habis"
+                const overlay = document.createElement('div');
+                overlay.className = 'out-of-stock-overlay';
+                overlay.innerHTML = '<span class="badge bg-danger">Habis</span>';
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 10;
+                `;
+                item.style.position = 'relative';
+                item.appendChild(overlay);
+            }
+        }
+    });
+}
+
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function () {
+    disableOutOfStockMenus();
+});

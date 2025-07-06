@@ -22,7 +22,7 @@
             <i class="bi bi-file-earmark-bar-graph fs-5"></i>
             <span>Laporan</span>
         </a>
-        <a href="#" class="nav-link">
+        <a href="{{ route('barang.index') }}" class="nav-link">
             <i class="bi bi-pie-chart fs-5"></i>
             <span>Barang</span>
         </a>
@@ -63,10 +63,10 @@
         <!-- Content Area dengan padding kiri lebih besar -->
         <div class="content-area ps-5 pe-4 py-4 flex-grow-1" style="margin-left: 15px; background-color: #f8f9fa;">
             @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             @endif
 
             <div class="tab-content">
@@ -84,7 +84,8 @@
                         </div>
                         <div class="ms-4">
                             <h4 class="mb-1">{{ $user->name }}</h4>
-                            <span class="badge bg-primary">{{ $user->role ?? 'User' }}</span>
+                            <span
+                                class="badge bg-primary">{{ $user->role ?? 'User' }}</span>
                         </div>
                     </div>
 
@@ -140,28 +141,31 @@
                         <h4 class="mb-4">Management Akses</h4>
 
                         @if($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show mb-4">
-                            <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                            <div class="alert alert-danger alert-dismissible fade show mb-4">
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
                         @endif
 
                         @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show mb-4">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                            <div class="alert alert-success alert-dismissible fade show mb-4">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
                         @endif
 
                         @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show mb-4">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                            <div class="alert alert-danger alert-dismissible fade show mb-4">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
                         @endif
 
                         <!-- Form Tambah User Baru -->
@@ -175,9 +179,10 @@
                                     <div class="col-md-6">
                                         <label for="new_name" class="form-label">Nama Lengkap</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                            id="new_name" name="name" value="{{ old('name') }}" required>
+                                            id="new_name" name="name" value="{{ old('name') }}"
+                                            required>
                                         @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
@@ -185,9 +190,10 @@
                                     <div class="col-md-6">
                                         <label for="new_email" class="form-label">Email</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                            id="new_email" name="email" value="{{ old('email') }}" required>
+                                            id="new_email" name="email" value="{{ old('email') }}"
+                                            required>
                                         @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
@@ -197,13 +203,15 @@
                                         <select class="form-select @error('role') is-invalid @enderror" id="new_role"
                                             name="role" required>
                                             <option value="" selected disabled>Pilih Role</option>
-                                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>
+                                            <option value="admin"
+                                                {{ old('role') == 'admin' ? 'selected' : '' }}>
                                                 Admin</option>
-                                            <option value="kasir" {{ old('role') == 'kasir' ? 'selected' : '' }}>
+                                            <option value="kasir"
+                                                {{ old('role') == 'kasir' ? 'selected' : '' }}>
                                                 Kasir</option>
                                         </select>
                                         @error('role')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
@@ -214,7 +222,7 @@
                                             class="form-control @error('password') is-invalid @enderror"
                                             id="new_password" name="password" required>
                                         @error('password')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
@@ -240,42 +248,42 @@
                         <div class="mt-5">
                             <h5 class="mb-3">Daftar Pengguna</h5>
                             @if($users->count() > 0)
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($users as $user)
-                                        <tr>
-                                            <td>{{ $user->name }}</td>
-                                            <td>{{ $user->email }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ $user->role == 'admin' ? 'danger' : 'primary' }}">
-                                                    {{ ucfirst($user->role) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($users as $user)
+                                                <tr>
+                                                    <td>{{ $user->name }}</td>
+                                                    <td>{{ $user->email }}</td>
+                                                    <td>
+                                                        <span
+                                                            class="badge bg-{{ $user->role == 'admin' ? 'danger' : 'primary' }}">
+                                                            {{ ucfirst($user->role) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-warning">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             @else
-                            <div class="text-center py-3">
-                                <i class="bi bi-people fs-3 text-muted"></i>
-                                <p class="text-muted mt-2">Belum ada data pengguna</p>
-                            </div>
+                                <div class="text-center py-3">
+                                    <i class="bi bi-people fs-3 text-muted"></i>
+                                    <p class="text-muted mt-2">Belum ada data pengguna</p>
+                                </div>
                             @endif
                         </div>
                     </div>

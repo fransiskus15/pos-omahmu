@@ -36,4 +36,36 @@ class StokMenuController extends Controller
         // Redirect atau response setelah berhasil menyimpan
         return redirect()->route('dashboard')->with('success', 'Menu berhasil ditambahkan!');
     }
+
+    public function updateStok(Request $request, $id)
+    {
+        $request->validate([
+            'kuantitas' => 'required|integer|min:1', // Minimal 1 untuk restok
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        $menu = StokMenu::findOrFail($id);
+        $oldStok = $menu->kuantitas;
+        $jumlahRestok = $request->kuantitas; // Jumlah yang ditambahkan
+        $newStok = $oldStok + $jumlahRestok; // Tambahkan ke stok yang ada
+        
+        $menu->kuantitas = $newStok;
+        $menu->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Stok {$menu->nama_menu} berhasil ditambahkan! Penambahan: {$jumlahRestok} pcs, Total stok: {$newStok} pcs",
+            'new_stok' => $menu->kuantitas,
+            'added_amount' => $jumlahRestok
+        ]);
+    }
+
+    public function getLowStock()
+    {
+        $lowStockMenus = StokMenu::where('kuantitas', '<=', 10)
+            ->orderBy('kuantitas', 'asc')
+            ->get();
+
+        return response()->json($lowStockMenus);
+    }
 }

@@ -9,7 +9,8 @@ use App\Http\Controllers\{
     UserController,
     StokMenuController,
     OrderController,
-    LaporanController
+    LaporanController,
+    BarangController
 };
 
 // Public Routes
@@ -29,6 +30,8 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
     // StokMenu Routes (menggunakan resource untuk route CRUD otomatis)
     Route::resource('stok_menu', StokMenuController::class)->except(['create', 'edit']); // Menyembunyikan create/edit jika menggunakan modal
+    Route::put('/stok_menu/{id}/update-stok', [StokMenuController::class, 'updateStok'])->name('stok_menu.update-stok');
+    Route::get('/stok_menu/low-stock', [StokMenuController::class, 'getLowStock'])->name('stok_menu.low-stock');
 
     // Profile Settings
     Route::prefix('pengaturan')->controller(ProfileController::class)->group(function () {
@@ -38,6 +41,14 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
 
+    // Barang Routes
+    Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
+    Route::post('/bahan/store', [BarangController::class, 'store'])->name('bahan.store');
+    Route::post('/barang/restok-batch', [BarangController::class, 'restokBatch'])->name('barang.restok-batch');
+
+    // Order Routes
+    Route::post('/submit-order', [OrderController::class, 'submit'])->name('order.submit');
+
     // User Management
     Route::prefix('users')->name('users.')->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('store');
@@ -46,6 +57,3 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
     // Tambahkan route authenticated lainnya di sini
 });
-
-// Submit order
-Route::post('/submit-order', [OrderController::class, 'submit'])->name('order.submit');

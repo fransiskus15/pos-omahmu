@@ -23,7 +23,7 @@
             <i class="bi bi-file-earmark-bar-graph fs-5"></i>
             <span>Laporan</span>
         </a>
-        <a href="#" class="nav-link">
+        <a href="{{ route('barang.index') }}" class="nav-link">
             <i class="bi bi-pie-chart fs-5"></i>
             <span>Barang</span>
         </a>
@@ -68,6 +68,12 @@
                     <p class="text-center">Rp
                         {{ number_format($menu->harga, 0, ',', '.') }}
                     </p>
+                    <div class="text-center">
+                        <span
+                            class="badge bg-{{ $menu->kuantitas > 10 ? 'success' : ($menu->kuantitas > 0 ? 'warning' : 'danger') }}">
+                            Stok: {{ $menu->kuantitas }} pcs
+                        </span>
+                    </div>
                 </div>
                 @endforeach
             </div>

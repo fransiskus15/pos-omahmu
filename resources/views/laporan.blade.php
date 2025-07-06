@@ -22,7 +22,7 @@
             <i class="bi bi-file-earmark-bar-graph fs-5"></i>
             <span>Laporan</span>
         </a>
-        <a href="#" class="nav-link">
+        <a href="{{ route('barang.index') }}" class="nav-link">
             <i class="bi bi-pie-chart fs-5"></i>
             <span>Barang</span>
         </a>
@@ -70,14 +70,14 @@
                             </thead>
                             <tbody>
                                 @foreach($laporan as $item)
-                                <tr>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y H:i') }}
-                                    </td>
-                                    <td>{{ $item->id_transaksi }}</td>
-                                    <td>Rp
-                                        {{ number_format($item->total, 0, ',', '.') }}
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y H:i') }}
+                                        </td>
+                                        <td>{{ $item->id_transaksi }}</td>
+                                        <td>Rp
+                                            {{ number_format($item->total, 0, ',', '.') }}
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -104,7 +104,8 @@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn"
                                     style="background-color: #1E293B; color: #fff;">Terapkan Filter</button>
-                                <a href="{{ route('laporan.index') }}" class="btn btn-secondary">Reset</a>
+                                <a href="{{ route('laporan.index') }}"
+                                    class="btn btn-secondary">Reset</a>
                             </div>
                         </form>
                     </div>
