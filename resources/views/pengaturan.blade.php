@@ -30,10 +30,14 @@
             <i class="bi bi-gear fs-5"></i>
             <span>Pengaturan</span>
         </a>
-        <a href="#" class="nav-link text-danger">
-            <i class="bi bi-box-arrow-right fs-5"></i>
-            <span>Logout</span>
-        </a>
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="nav-link text-danger"
+                style="background:none; border:none; padding:0; width:70px;">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+                <span>Logout</span>
+            </button>
+        </form>
     </div>
 
     <!-- Main Content -->
@@ -71,11 +75,10 @@
                     <!-- Profile Header -->
                     <div class="d-flex align-items-center mb-4">
                         <div class="position-relative">
-                            <img src="{{ asset('img/profile-picture.jpg') }}"
-                                class="rounded-circle"
-                                style="width: 80px; height: 80px; object-fit: cover;"
-                                alt="Profile Picture">
-                            <button class="btn btn-sm btn-secondary position-absolute bottom-0 end-0 rounded-circle p-1">
+                            <img src="{{ asset('img/profile-picture.jpg') }}" class="rounded-circle"
+                                style="width: 80px; height: 80px; object-fit: cover;" alt="Profile Picture">
+                            <button
+                                class="btn btn-sm btn-secondary position-absolute bottom-0 end-0 rounded-circle p-1">
                                 <i class="bi bi-camera-fill"></i>
                             </button>
                         </div>
@@ -113,7 +116,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                                <input type="password" name="password_confirmation" class="form-control input-custom-plain">
+                                <input type="password" name="password_confirmation"
+                                    class="form-control input-custom-plain">
                             </div>
                         </div>
                         <small class="text-muted d-block mb-4">Kosongkan jika tidak ingin mengubah password.</small>
@@ -190,11 +194,13 @@
                                     <!-- Role -->
                                     <div class="col-md-6">
                                         <label for="new_role" class="form-label">Role</label>
-                                        <select class="form-select @error('role') is-invalid @enderror"
-                                            id="new_role" name="role" required>
+                                        <select class="form-select @error('role') is-invalid @enderror" id="new_role"
+                                            name="role" required>
                                             <option value="" selected disabled>Pilih Role</option>
-                                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                            <option value="kasir" {{ old('role') == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>
+                                                Admin</option>
+                                            <option value="kasir" {{ old('role') == 'kasir' ? 'selected' : '' }}>
+                                                Kasir</option>
                                         </select>
                                         @error('role')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -204,7 +210,8 @@
                                     <!-- Password -->
                                     <div class="col-md-6">
                                         <label for="new_password" class="form-label">Password</label>
-                                        <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                        <input type="password"
+                                            class="form-control @error('password') is-invalid @enderror"
                                             id="new_password" name="password" required>
                                         @error('password')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -213,9 +220,10 @@
 
                                     <!-- Password Confirmation -->
                                     <div class="col-md-6">
-                                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                                        <input type="password" class="form-control"
-                                            id="password_confirmation" name="password_confirmation" required>
+                                        <label for="password_confirmation" class="form-label">Konfirmasi
+                                            Password</label>
+                                        <input type="password" class="form-control" id="password_confirmation"
+                                            name="password_confirmation" required>
                                     </div>
                                 </div>
 
@@ -248,7 +256,8 @@
                                             <td>{{ $user->name }}</td>
                                             <td>{{ $user->email }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $user->role == 'admin' ? 'danger' : 'primary' }}">
+                                                <span
+                                                    class="badge bg-{{ $user->role == 'admin' ? 'danger' : 'primary' }}">
                                                     {{ ucfirst($user->role) }}
                                                 </span>
                                             </td>

@@ -12,6 +12,9 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
+        if ($user->role !== 'admin') {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        }
         $users = User::where('user_id', '!=', $user->user_id)->get(); // Mengambil semua user kecuali yang sedang login
 
         return view('pengaturan', [

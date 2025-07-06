@@ -29,10 +29,14 @@
         <a href="{{ route('pengaturan') }}" class="nav-link">
             <i class="bi bi-gear fs-5"></i> Pengaturan
         </a>
-        <a href="#" class="nav-link text-danger">
-            <i class="bi bi-box-arrow-right fs-5"></i>
-            <span>Logout</span>
-        </a>
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="nav-link text-danger"
+                style="background:none; border:none; padding:0; width:70px;">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+                <span>Logout</span>
+            </button>
+        </form>
     </div>
 
     <!-- Main Content -->
@@ -46,7 +50,9 @@
                 <div class="card shadow-sm rounded mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Ringkasan Penjualan</h5>
-                        <p class="card-text">Total Transaksi: <strong>Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</strong></p>
+                        <p class="card-text">Total Transaksi: <strong>Rp
+                                {{ number_format($totalPenjualan, 0, ',', '.') }}</strong>
+                        </p>
                     </div>
                 </div>
 
@@ -63,11 +69,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($laporan as $item)
+                                @foreach($laporan as $item)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y H:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y H:i') }}
+                                    </td>
                                     <td>{{ $item->id_transaksi }}</td>
-                                    <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                                    <td>Rp
+                                        {{ number_format($item->total, 0, ',', '.') }}
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -84,14 +93,17 @@
                         <form method="GET" action="{{ route('laporan.index') }}">
                             <div class="mb-3">
                                 <label for="start_date" class="form-label">Dari Tanggal</label>
-                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                <input type="date" class="form-control" id="start_date" name="start_date"
+                                    value="{{ request('start_date') }}">
                             </div>
                             <div class="mb-3">
                                 <label for="end_date" class="form-label">Sampai Tanggal</label>
-                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                <input type="date" class="form-control" id="end_date" name="end_date"
+                                    value="{{ request('end_date') }}">
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn" style="background-color: #1E293B; color: #fff;">Terapkan Filter</button>
+                                <button type="submit" class="btn"
+                                    style="background-color: #1E293B; color: #fff;">Terapkan Filter</button>
                                 <a href="{{ route('laporan.index') }}" class="btn btn-secondary">Reset</a>
                             </div>
                         </form>

@@ -1,15 +1,6 @@
 let orders = {};
 
-function selectMenu(nama, harga) {
-    // 1. Format nama file gambar dengan benar
-    const formattedName = nama
-        .toLowerCase()
-        .replace(/\s+/g, "-") // Ganti spasi dengan dash
-        .replace(/[^a-z0-9-]/g, ""); // Hapus karakter khusus
-
-    // 2. Gunakan path relatif dari public/img
-    const imgPath = `img/${formattedName}.png`;
-
+function selectMenu(nama, harga, imgPath) {
     if (orders[nama]) {
         orders[nama].qty += 1;
     } else {
@@ -17,10 +8,9 @@ function selectMenu(nama, harga) {
             nama: nama,
             harga: harga,
             qty: 1,
-            img: imgPath, // Gunakan path langsung tanpa asset helper
+            img: imgPath,
         };
     }
-
     renderOrderPanel();
 }
 
@@ -121,11 +111,11 @@ function goBackToOrder() {
 
 function handlePayment(method) {
     const metode =
-        method === "credit"
-            ? "Credit Card"
-            : method === "cash"
-            ? "Cash"
-            : "QR Code";
+        method === "credit" ?
+        "Credit Card" :
+        method === "cash" ?
+        "Cash" :
+        "QR Code";
     alert(`Pembayaran dengan ${metode} berhasil!`);
 
     // Reset order
@@ -190,39 +180,48 @@ function submitPayment() {
         return;
     }
 
-    const method = selected.getAttribute("data-method");
+    // Ambil data order
+    const idTransaksi = document.querySelector('input[name="id_transaksi"]').value;
+    const total = parseInt(
+        document.getElementById("totalHargaLabelPayment").innerText.replace(/[^\d]/g, "")
+    ) || 0;
+    const csrfToken = document.querySelector('input[name="_token"]').value;
 
-    if (method === "cash") {
-        const jumlahBayar =
-            parseInt(document.getElementById("jumlahBayarInput").value) || 0;
-        const total = parseInt(
-            document
-                .getElementById("totalHargaLabelPayment")
-                .innerText.replace(/[^\d]/g, "")
-        );
+    // Kirim ke backend via AJAX
+    fetch('/submit-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                id_transaksi: idTransaksi,
+                total: total
+            })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal menyimpan transaksi');
+            // Jika backend return JSON, bisa pakai response.json(),
+            // jika redirect, bisa pakai response.text() atau window.location.reload()
+            return response.json().catch(() => ({}));
+        })
+        .then(data => {
+            // Reset semua form dan order
+            orders = {};
+            document.getElementById("orderContent").innerHTML =
+                '<small class="text-muted">Silahkan pilih menu</small>';
+            document.getElementById("totalItemsLabel").innerText = "0 items";
+            document.getElementById("totalHargaLabel").innerText = "Rp 0";
+            document.getElementById("jumlahBayarInput").value = "";
+            document.getElementById("kembalianOutput").value = "";
 
-        if (jumlahBayar < total) {
-            alert("Jumlah bayar kurang dari total belanja.");
-            return;
-        }
-
-        alert("Pembayaran tunai berhasil!");
-    } else if (method === "credit") {
-        alert("Pembayaran dengan kartu berhasil!");
-    } else if (method === "qr") {
-        alert("Pembayaran QR berhasil!");
-    }
-
-    // Reset semua form dan order
-    orders = {};
-    document.getElementById("orderContent").innerHTML =
-        '<small class="text-muted">Silahkan pilih menu</small>';
-    document.getElementById("totalItemsLabel").innerText = "0 items";
-    document.getElementById("totalHargaLabel").innerText = "Rp 0";
-    document.getElementById("jumlahBayarInput").value = "";
-    document.getElementById("kembalianOutput").value = "";
-
-    goBackToOrder();
+            goBackToOrder();
+            showAlert("success", "Transaksi berhasil dicatat!");
+        })
+        .catch(error => {
+            showAlert("danger", error.message);
+        });
 }
 
 // Preview gambar sebelum upload
@@ -254,13 +253,13 @@ document
 
         // Kirim data via AJAX
         fetch("{{ route('menu.store') }}", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                Accept: "application/json",
-            },
-        })
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    Accept: "application/json",
+                },
+            })
             .then((response) => response.json())
             .then((data) => {
                 if (data.success) {

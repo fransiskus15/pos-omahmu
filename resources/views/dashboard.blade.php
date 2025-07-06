@@ -27,13 +27,19 @@
             <i class="bi bi-pie-chart fs-5"></i>
             <span>Barang</span>
         </a>
+        @if(Auth::user() && Auth::user()->role === 'admin')
         <a href="{{ route('pengaturan') }}" class="nav-link">
             <i class="bi bi-gear fs-5"></i> Pengaturan
         </a>
-        <a href="#" class="nav-link text-danger">
-            <i class="bi bi-box-arrow-right fs-5"></i>
-            <span>Logout</span>
-        </a>
+        @endif
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="nav-link text-danger"
+                style="background:none; border:none; padding:0; width:70px;">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+                <span>Logout</span>
+            </button>
+        </form>
     </div>
 
     <!-- Main Content -->
@@ -46,20 +52,22 @@
                     <button onclick="filterMenu('minuman')">Minuman</button>
                     <button onclick="filterMenu('snack')">Snack</button>
                 </div>
-                <button type="button" class="btn btn-primary"
-                    data-bs-toggle="modal" data-bs-target="#tambahMenuModal"
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahMenuModal"
                     style="border: none; padding: 4px 10px; border-radius: 6px; background-color: #1E2431; color: #fff; font-size: 0.8rem;">
                     <i class="bi bi-plus"></i> Tambah Menu
                 </button>
             </div>
 
             <div class="menu-grid" id="menuGrid">
-                @foreach ($menus as $menu)
-                <div class="menu-item" data-kategori="{{ $menu->jenis_menu }}" onclick="selectMenu('{{ $menu->nama_menu }}', '{{ $menu->harga }}')">
+                @foreach($menus as $menu)
+                <div class="menu-item" data-kategori="{{ $menu->jenis_menu }}"
+                    onclick="selectMenu('{{ $menu->nama_menu }}', '{{ $menu->harga }}', '{{ asset('storage/' . $menu->gambar_produk) }}')">
                     <img src="{{ asset('storage/' . $menu->gambar_produk) }}" alt="{{ $menu->nama_menu }}"
                         style="width: 100%; height: 100px; border-radius: 6px;">
                     <h6 class="mt-2 text-center fw-bold" style="color: #1E2431;">{{ $menu->nama_menu }}</h6>
-                    <p class="text-center">Rp {{ number_format($menu->harga, 0, ',', '.') }}</p>
+                    <p class="text-center">Rp
+                        {{ number_format($menu->harga, 0, ',', '.') }}
+                    </p>
                 </div>
                 @endforeach
             </div>
@@ -72,7 +80,9 @@
             <div id="orderPanel" class="order-panel">
                 <div>
                     <h5>Order Menu</h5>
-                    <p class="text-muted mb-2">No. Transaksi: <strong>#{{ 'POS' . date('ymdHis') }}</strong></p>
+                    <p class="text-muted mb-2">No. Transaksi:
+                        <strong>#{{ 'POS' . date('ymdHis') }}</strong>
+                    </p>
                     <div id="orderContent" class="mt-3 d-flex flex-column gap-2">
                         <small class="text-muted">Silahkan pilih menu</small>
                     </div>
@@ -139,7 +149,8 @@
                         <h6>Cash Payment</h6>
                         <div class="mb-2">
                             <label class="form-label">Jumlah Bayar</label>
-                            <input type="number" class="form-control" id="jumlahBayarInput" placeholder="Masukkan nominal" oninput="hitungKembalian()">
+                            <input type="number" class="form-control" id="jumlahBayarInput"
+                                placeholder="Masukkan nominal" oninput="hitungKembalian()">
                         </div>
                         <div class="mb-2">
                             <label class="form-label">Kembalian</label>
@@ -151,7 +162,8 @@
                     <div id="qrForm" class="mt-4 d-none text-center">
                         <h6>QR Code Payment</h6>
                         <p>Silakan scan QR di bawah untuk membayar</p>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?data=BayarPOSOmahMU&size=150x150" alt="QR Code">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?data=BayarPOSOmahMU&size=150x150"
+                            alt="QR Code">
                         <p class="text-muted mt-2"><small>Setelah pembayaran berhasil, klik tombol di bawah</small></p>
                     </div>
                 </div>
@@ -184,10 +196,11 @@
                     <!-- Upload Gambar -->
                     <div class="mb-3 text-center">
                         <div class="image-upload-container mb-2">
-                            <img id="previewGambar" src="{{ asset('img/placeholder-image.jpg') }}"
-                                class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover;">
+                            <img id="previewGambar" src="{{ asset('img/placeholder-image.jpg') }}" class="img-thumbnail"
+                                style="width: 200px; height: 200px; object-fit: cover;">
                         </div>
-                        <input type="file" class="form-control d-none" id="gambarMenu" name="gambar_produk" accept="image/*">
+                        <input type="file" class="form-control d-none" id="gambarMenu" name="gambar_produk"
+                            accept="image/*">
                         <button type="button" class="btn btn-sm btn-outline-secondary"
                             onclick="document.getElementById('gambarMenu').click()">
                             <i class="bi bi-image"></i> Pilih Gambar
@@ -209,13 +222,15 @@
                     <!-- Nama Menu -->
                     <div class="mb-3">
                         <label class="form-label">Nama Menu</label>
-                        <input type="text" class="form-control" name="nama_menu" placeholder="Contoh: Nasi Goreng Spesial" required>
+                        <input type="text" class="form-control" name="nama_menu"
+                            placeholder="Contoh: Nasi Goreng Spesial" required>
                     </div>
 
                     <!-- Kuantitas -->
                     <div class="mb-3">
                         <label class="form-label">Kuantitas</label>
-                        <input type="number" class="form-control" name="kuantitas" min="1" placeholder="Contoh: 50" required>
+                        <input type="number" class="form-control" name="kuantitas" min="1" placeholder="Contoh: 50"
+                            required>
                     </div>
 
 
@@ -240,11 +255,13 @@
 <!-- JS -->
 <script src="{{ asset('js/app.js') }}"></script>
 <script>
-    document.getElementById('orderForm').addEventListener('submit', function() {
-        const totalLabel = document.getElementById('totalHargaLabel').textContent;
-        const totalNumber = parseInt(totalLabel.replace(/[^\d]/g, '')) || 0;
-        document.getElementById('totalInput').value = totalNumber;
-    });
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Cegah submit form
+    const totalLabel = document.getElementById('totalHargaLabel').textContent;
+    const totalNumber = parseInt(totalLabel.replace(/[^\d]/g, '')) || 0;
+    document.getElementById('totalInput').value = totalNumber;
+    goToPayment(); // Pindah ke panel payment
+});
 </script>
 
 
