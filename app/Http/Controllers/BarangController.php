@@ -8,30 +8,41 @@ use Illuminate\Http\Request;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $menus = StokMenu::all();
-        $bahanBakus = StokBahanBaku::all();
+
+        $query = StokBahanBaku::query();
+        // Filter tanggal jika ada
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_mulai);
+        }
+        if ($request->filled('tanggal_selesai')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_selesai);
+        }
+        $bahanBakus = $query->get();
+        $totalHarga = $bahanBakus->sum('harga_total');
+
         $lowStockMenus = StokMenu::where('kuantitas', '<=', 10)->orderBy('kuantitas', 'asc')->get();
-        
-        return view('barang', compact('menus', 'bahanBakus', 'lowStockMenus'));
+        return view('barang', compact('menus', 'bahanBakus', 'lowStockMenus', 'totalHarga'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'nama_bahan' => 'required|string|max:255',
-            'stok' => 'required|integer|min:0',
+            'kuantitas' => 'required|integer|min:0',
             'satuan' => 'required|string|max:50',
             'keterangan' => 'nullable|string|max:500',
+            'harga_total' => 'required|integer|min:0',
         ]);
 
         StokBahanBaku::create([
             'nama_bahan' => $request->nama_bahan,
-            'stok' => $request->stok,
+            'kuantitas' => $request->kuantitas,
             'satuan' => $request->satuan,
             'keterangan' => $request->keterangan,
-            'ketersediaan' => $request->stok > 0 ? 'Tersedia' : 'Habis',
+            'harga_total' => $request->harga_total,
         ]);
 
         return redirect()->route('barang.index')->with('success', 'Bahan baku berhasil ditambahkan!');

@@ -68,4 +68,30 @@ class StokMenuController extends Controller
 
         return response()->json($lowStockMenus);
     }
+
+    public function destroy($id)
+    {
+        try {
+            $menu = StokMenu::findOrFail($id);
+            
+            // Hapus gambar dari storage jika ada
+            if ($menu->gambar_produk && Storage::disk('public')->exists($menu->gambar_produk)) {
+                Storage::disk('public')->delete($menu->gambar_produk);
+            }
+            
+            // Hapus data menu dari database
+            $menu->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Menu '{$menu->nama_menu}' berhasil dihapus!"
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus menu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

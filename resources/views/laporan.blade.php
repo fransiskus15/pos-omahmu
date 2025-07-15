@@ -66,6 +66,8 @@
                                     <th>Tanggal</th>
                                     <th>ID Transaksi</th>
                                     <th>Total</th>
+                                    <th>Order Details</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,6 +78,27 @@
                                         <td>{{ $item->id_transaksi }}</td>
                                         <td>Rp
                                             {{ number_format($item->total, 0, ',', '.') }}
+                                        </td>
+                                        <td>
+                                            @php
+                                                $details = is_array($item->order_details)
+                                                ? $item->order_details
+                                                : (is_string($item->order_details) ? json_decode($item->order_details,
+                                                true) : []);
+                                            @endphp
+                                            @if($details && is_array($details))
+                                                <ul class="mb-0 ps-3">
+                                                    @foreach($details as $order)
+                                                        <li>
+                                                            {{ $order['nama'] }}
+                                                            x{{ $order['qty'] }} @ Rp
+                                                            {{ number_format($order['harga'], 0, ',', '.') }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

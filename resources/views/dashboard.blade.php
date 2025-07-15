@@ -28,9 +28,9 @@
             <span>Barang</span>
         </a>
         @if(Auth::user() && Auth::user()->role === 'admin')
-        <a href="{{ route('pengaturan') }}" class="nav-link">
-            <i class="bi bi-gear fs-5"></i> Pengaturan
-        </a>
+            <a href="{{ route('pengaturan') }}" class="nav-link">
+                <i class="bi bi-gear fs-5"></i> Pengaturan
+            </a>
         @endif
         <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display:inline;">
             @csrf
@@ -60,21 +60,32 @@
 
             <div class="menu-grid" id="menuGrid">
                 @foreach($menus as $menu)
-                <div class="menu-item" data-kategori="{{ $menu->jenis_menu }}"
-                    onclick="selectMenu('{{ $menu->nama_menu }}', '{{ $menu->harga }}', '{{ asset('storage/' . $menu->gambar_produk) }}')">
-                    <img src="{{ asset('storage/' . $menu->gambar_produk) }}" alt="{{ $menu->nama_menu }}"
-                        style="width: 100%; height: 100px; border-radius: 6px;">
-                    <h6 class="mt-2 text-center fw-bold" style="color: #1E2431;">{{ $menu->nama_menu }}</h6>
-                    <p class="text-center">Rp
-                        {{ number_format($menu->harga, 0, ',', '.') }}
-                    </p>
-                    <div class="text-center">
-                        <span
-                            class="badge bg-{{ $menu->kuantitas > 10 ? 'success' : ($menu->kuantitas > 0 ? 'warning' : 'danger') }}">
-                            Stok: {{ $menu->kuantitas }} pcs
-                        </span>
+                    <div class="menu-item" data-kategori="{{ $menu->jenis_menu }}">
+                        <div class="position-relative">
+                            <img src="{{ asset('storage/' . $menu->gambar_produk) }}"
+                                alt="{{ $menu->nama_menu }}"
+                                style="width: 100%; height: 100px; border-radius: 6px; cursor: pointer;"
+                                onclick="selectMenu('{{ $menu->nama_menu }}', '{{ $menu->harga }}', '{{ asset('storage/' . $menu->gambar_produk) }}')">
+
+                            <!-- Tombol hapus di pojok kanan atas -->
+                            <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                                style="opacity: 0.8; z-index: 10;"
+                                onclick="confirmDeleteMenu({{ $menu->id_menu }}, '{{ $menu->nama_menu }}')"
+                                title="Hapus Menu">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h6 class="mt-2 text-center fw-bold" style="color: #1E2431;">{{ $menu->nama_menu }}</h6>
+                        <p class="text-center">Rp
+                            {{ number_format($menu->harga, 0, ',', '.') }}
+                        </p>
+                        <div class="text-center">
+                            <span
+                                class="badge bg-{{ $menu->kuantitas > 10 ? 'success' : ($menu->kuantitas > 0 ? 'warning' : 'danger') }}">
+                                Stok: {{ $menu->kuantitas }} pcs
+                            </span>
+                        </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -100,7 +111,8 @@
                     </div>
                     <form action="{{ route('order.submit') }}" method="POST" id="orderForm">
                         @csrf
-                        <input type="hidden" name="id_transaksi" value="{{ 'POS' . date('ymdHis') }}">
+                        <input type="hidden" name="id_transaksi"
+                            value="{{ 'POS' . date('ymdHis') }}">
                         <input type="hidden" name="total" id="totalInput">
                         <button type="submit" class="btn-order">
                             <i class="bi bi-save-fill"></i> Order
@@ -202,8 +214,8 @@
                     <!-- Upload Gambar -->
                     <div class="mb-3 text-center">
                         <div class="image-upload-container mb-2">
-                            <img id="previewGambar" src="{{ asset('img/placeholder-image.jpg') }}" class="img-thumbnail"
-                                style="width: 200px; height: 200px; object-fit: cover;">
+                            <img id="previewGambar" src="{{ asset('img/placeholder-image.jpg') }}"
+                                class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover;">
                         </div>
                         <input type="file" class="form-control d-none" id="gambarMenu" name="gambar_produk"
                             accept="image/*">
@@ -258,17 +270,131 @@
     </div>
 </div>
 
+<!-- Modal Konfirmasi Hapus Menu -->
+<div class="modal fade" id="deleteMenuModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Konfirmasi Hapus Menu
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <p class="text-center mb-0">
+                    Apakah Anda yakin ingin menghapus menu <strong id="menuNameToDelete"></strong>?
+                </p>
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan. Menu dan gambar terkait akan
+                    dihapus secara permanen.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteMenu()">
+                    <i class="bi bi-trash me-1"></i>Hapus Menu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JS -->
 <script src="{{ asset('js/app.js') }}"></script>
 <script>
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Cegah submit form
-    const totalLabel = document.getElementById('totalHargaLabel').textContent;
-    const totalNumber = parseInt(totalLabel.replace(/[^\d]/g, '')) || 0;
-    document.getElementById('totalInput').value = totalNumber;
-    goToPayment(); // Pindah ke panel payment
-});
-</script>
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // Cegah submit form
+        const totalLabel = document.getElementById('totalHargaLabel').textContent;
+        const totalNumber = parseInt(totalLabel.replace(/[^\d]/g, '')) || 0;
+        document.getElementById('totalInput').value = totalNumber;
+        goToPayment(); // Pindah ke panel payment
+    });
 
+    // Variabel global untuk menyimpan ID menu yang akan dihapus
+    let menuIdToDelete = null;
+
+    // Fungsi untuk konfirmasi hapus menu
+    function confirmDeleteMenu(id, nama) {
+        menuIdToDelete = id;
+        document.getElementById('menuNameToDelete').textContent = nama;
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteMenuModal'));
+        modal.show();
+    }
+
+    // Fungsi untuk menghapus menu
+    function deleteMenu() {
+        if (!menuIdToDelete) {
+            showAlert('danger', 'ID menu tidak ditemukan');
+            return;
+        }
+
+        // Tampilkan loading pada tombol
+        const deleteBtn = document.querySelector('#deleteMenuModal .btn-danger');
+        const originalText = deleteBtn.innerHTML;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Menghapus...';
+
+        fetch(`/stok_menu/${menuIdToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('deleteMenuModal')).hide();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('danger', data.message || 'Gagal menghapus menu');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', 'Terjadi kesalahan saat menghapus menu');
+            })
+            .finally(() => {
+                // Reset tombol
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+                menuIdToDelete = null;
+            });
+    }
+
+    // Fungsi untuk menampilkan alert
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+</script>
 
 @endsection

@@ -11,9 +11,9 @@ class StokBahanBaku extends Model
     
     protected $fillable = [
         'nama_bahan',
-        'stok', 
+        'kuantitas',
         'satuan',
         'keterangan',
-        'ketersediaan'
+        'harga_total'
     ];
 } 
