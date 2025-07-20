@@ -27,14 +27,19 @@ Laporan dan analisis keuangan
    git clone https://github.com/fransiskus15/pos-omahmu.git
 
 2. Jalankan perintah berikut:
-   cd pos-omahmu
+
+    cd pos-omahmu
 
     composer install
 
     cp .env.example .env
+
     Lalu buka file .env dan atur koneksi database:
+
     DB_DATABASE=pos
+
     DB_USERNAME=root
+
     DB_PASSWORD=
 
     php artisan key:generate
